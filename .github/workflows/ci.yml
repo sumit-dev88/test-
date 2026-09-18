@@ -10,10 +10,31 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: task_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d task_db"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     env:
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
       DEBUG: "True"
       ALLOWED_HOSTS: "127.0.0.1,localhost"
+
+      DB_NAME: task_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
 
     steps:
       - name: Checkout code
@@ -28,6 +49,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
+      - name: Run migrations
+        run: python manage.py migrate
 
       - name: Django check
         run: python manage.py check
