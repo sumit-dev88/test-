@@ -2,15 +2,18 @@ name: Django CI
 
 on:
   push:
-    branches: [ "main" ]
-
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   test:
-
     runs-on: ubuntu-latest
+
+    env:
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      DEBUG: "True"
+      ALLOWED_HOSTS: "127.0.0.1,localhost"
 
     steps:
       - name: Checkout code
@@ -26,10 +29,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Django checks
-        run: |
-          python manage.py check
+      - name: Django check
+        run: python manage.py check
 
       - name: Run tests
-        run: |
-          python manage.py test
+        run: python manage.py test
